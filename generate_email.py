@@ -84,13 +84,20 @@ def save_chapter(chapter):
         json.dump(chapter, f, ensure_ascii=False, indent=2)
 
 def main():
-    rank_data = get_rank_list()
+    rank_data_json = os.environ.get('RANK_DATA', '[]')
+    rank_data = json.loads(rank_data_json)
     if not rank_data:
         print("无法获取当前排行榜信息")
         return False
-    return rank_data
+    # 生成HTML内容
+    template_path = 'templates/rank_email.html'
+    html_content = generate_html_email(rank_data, template_path)
+    print(html_content)
+    # 输出到文件（用于调试）
+    # with open('generated_email.html', 'w', encoding='utf-8') as f:
+    #     f.write(html_content)
+    with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+        print(f'email_html={html_content}', file=fh)
 
 if __name__ == '__main__':
-    rank_data = main()
-    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
-        print(f'rank_data={str(rank_data).lower()}', file=fh)
+    main()

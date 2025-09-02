@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小说排行榜更新</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+        }
+        .content {
+            padding: 30px;
+        }
+        .rank-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .rank-table th {
+            background-color: #f8f9fa;
+            padding: 15px;
+            text-align: left;
+            font-weight: bold;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .rank-table td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .rank-table tr:hover {
+            background-color: #f8f9fa;
+        }
+        .rank-number {
+            font-weight: bold;
+            text-align: center;
+            width: 60px;
+        }
+        .up {
+            color: #28a745;
+            font-weight: bold;
+        }
+        .down {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .new {
+            color: #007bff;
+            font-weight: bold;
+        }
+        .same {
+            color: #6c757d;
+        }
+        .highlight {
+            background-color: #fff3cd !important;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+            color: #6c757d;
+            font-size: 12px;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        .badge-new {
+            background-color: #007bff;
+            color: white;
+        }
+        .badge-hot {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 问道排行榜更新</h1>
+            <p>更新时间: {{update_time}}</p>
+        </div>
+
+        <div class="content">
+            <h2>最新排行榜TOP {{rank_count}}</h2>
+            <table class="rank-table">
+                <thead>
+                    <tr>
+                        <th>区组</th>
+                        <th>角色名称</th>
+                        <th>道行</th>
+                        <th>系</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in rank_data %}
+
+                        <td>
+                            {{item.zone}}
+                            {% if item.rank == 1 %}🥇{% endif %}
+                            {% if item.rank == 2 %}🥈{% endif %}
+                            {% if item.rank == 3 %}🥉{% endif %}
+                        </td>
+                        <td>
+                            <strong>{{item.name}}</strong>
+                            {% if item.is_new %}<span class="badge badge-new">新</span>{% endif %}
+                            {% if item.is_hot %}<span class="badge badge-hot">热</span>{% endif %}
+                        </td>
+                        <td>{{item.col2}}</td>
+                        <td>{{item.col3}}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            <div style="margin-top: 30px; padding: 20px; background-color: #e7f3ff; border-radius: 5px;">
+                <h3>📈 统计信息</h3>
+                <p>• 上升最快: <strong>{{fastest_rise}}</strong></p>
+                <p>• 新上榜作品: <strong>{{new_books_count}}</strong> 本</p>
+                <p>• 下次更新时间: {{next_update_time}}</p>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>此邮件由 GitHub Actions 自动生成并发送</p>
+            <p>请勿直接回复此邮件</p>
+        </div>
+    </div>
+</body>
+</html>
