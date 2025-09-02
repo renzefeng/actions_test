@@ -49,7 +49,7 @@ jobs:
         username: ${{ secrets.MAIL_USERNAME }}
         password: ${{ secrets.MAIL_PASSWORD }}
         subject: 排行榜更新提醒
-        body: "${{ steps.generate-email.outputs.email_html | base64decode }}"
+        body: "${{ steps.generate-email.outputs.email_html}}"
         to: 5515674@qq.com
         from: GitHub Actions
         secure: true
