@@ -44,3 +44,5 @@ jobs:
         body: 检测到排行榜有新的更新
         to: 5515674@qq.com
         from: GitHub Actions
+        secure: true
+        content_type: text/html
