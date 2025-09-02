@@ -95,8 +95,14 @@ def main():
     # 输出到文件（用于调试）
     # with open('generated_email.html', 'w', encoding='utf-8') as f:
     #     f.write(html_content)
-    with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
-        print(f'email_html={html_content}', file=fh)
+    # with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+    #     print(f'email_html={html_content}', file=fh)
+
+    with open('email_content.html', 'w', encoding='utf-8') as f:
+        f.write(html_content)
+    return True
 
 if __name__ == '__main__':
-    main()
+    success = main()
+    with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
+        print(f'has_update={str(success).lower()}', file=fh)
