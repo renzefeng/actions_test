@@ -94,3 +94,4 @@ if __name__ == '__main__':
     rank_data = main()
     with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
         print(f'rank_data={str(rank_data).lower()}', file=fh)
+        print(f'rank_update=true', file=fh)

@@ -32,6 +32,7 @@ jobs:
         python wendao_test.py
       env:
         GITHUB_OUTPUT: ${{ github.output_path }}  # 确保环境变量正确设置
+        RANK_DATA: '${{ steps.check.outputs.rank_data }}'
 
     - name: Generate HTML content
       id: generate-email

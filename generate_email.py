@@ -92,7 +92,6 @@ def main():
     # 生成HTML内容
     template_path = 'templates/rank_email.html'
     html_content = generate_html_email(rank_data, template_path)
-    print(html_content)
     # 输出到文件（用于调试）
     # with open('generated_email.html', 'w', encoding='utf-8') as f:
     #     f.write(html_content)
