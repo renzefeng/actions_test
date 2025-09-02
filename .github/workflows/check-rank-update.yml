@@ -30,7 +30,8 @@ jobs:
       id: check
       run: |
         python wendao_test.py
-        echo "rank_update=$(python wendao_test.py | grep '::set-output' | sed 's/.*=//')" >> $GITHUB_OUTPUT
+      env:
+        GITHUB_OUTPUT: ${{ github.output_path }}  # 确保环境变量正确设置
 
     - name: Send email notification
       if: steps.check.outputs.rank_update == 'true'

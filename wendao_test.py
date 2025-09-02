@@ -6,6 +6,7 @@
 
 import requests
 import json
+import os
 
 RANK_URL = "https://wd.leiting.com/rank/getList"
 LAST_CHAPTER_FILE = "last_chapter.json"
@@ -43,4 +44,5 @@ def main():
 if __name__ == '__main__':
     rank_update = main()
     # 输出结果供GitHub Actions使用
-    print(f"::set-output name=rank_update::{str(rank_update).lower()}")
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+        print(f'rank_update={str(rank_update).lower()}', file=fh)
