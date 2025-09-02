@@ -1,0 +1,46 @@
+name: Check Rank Update
+
+on:
+  schedule:
+    # 每30分钟运行一次
+    - cron: '*/30 * * * *'
+  workflow_dispatch: # 允许手动触发
+
+jobs:
+  check-update:
+    run-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+      with:
+        persist-credentials: false
+
+    - name: Setup Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests
+
+    - name: Run check script
+      id: check
+      run: |
+        python wendao_test.py
+        echo "rank_update=$(python wendao_test.py | grep '::set-output' | sed 's/.*=//')" >> $GITHUB_OUTPUT
+
+    - name: Send email notification
+      if: steps.check.outputs.rank_update == 'true'
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.qq.com
+        server_port: 465
+        username: ${{ secrets.MAIL_USERNAME }}
+        password: ${{ secrets.MAIL_PASSWORD }}
+        subject: 排行榜更新提醒
+        body: 检测到排行榜有新的更新
+        to: 5515674@qq.com
+        from: GitHub Actions
