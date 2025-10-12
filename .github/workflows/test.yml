@@ -14,7 +14,7 @@ jobs:
   validation:
     name: Validate Terragrunt Configuration
     runs-on: ubuntu-latest
-    # if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev'
+    if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev' || github.base_ref == 'dev'
 
     steps:
     - name: Debug GitHub Context
@@ -23,6 +23,7 @@ jobs:
         echo "Ref: ${{ github.ref }}"
         echo "Base Ref: ${{ github.base_ref }}"
         echo "Head Ref: ${{ github.head_ref }}"
+        echo "github.event.pull_request.base.sha: ${{ github.event.pull_request.base.sha }}"
         echo "Ref Name: ${{ github.ref_name }}"
         echo "Ref Type: ${{ github.ref_type }}"
         echo "SHA: ${{ github.sha }}"
@@ -52,3 +53,21 @@ jobs:
         terraform version
         echo "Terragrunt version:"
         terragrunt --version
+
+    - name: Find changed Terragrunt directories
+      id: changed-dirs
+      run:  |
+        CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
+        CHANGED_DIRS=""
+        for file in $CHANGED_FILES; do
+          dir=$(echo "$file" | cut -d'/' -f1)
+          if [[ -d "$dir" && -f "$dir/terragrunt.hcl" ]]; then
+            if [[ ! " $CHANGED_DIRS " =~ " $dir " ]]; then
+              CHANGED_DIRS="$CHANGED_DIRS $dir"
+            fi
+          fi
+        done
+        echo "变更的项目目录: $CHANGED_DIRS"
+        echo "changed_dirs=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+        
+    
