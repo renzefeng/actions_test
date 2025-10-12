@@ -56,18 +56,24 @@ jobs:
 
     - name: Find changed Terragrunt directories
       id: changed-dirs
-      run:  |
-        CHANGED_FILES=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.sha }})
-        CHANGED_DIRS=""
-        for file in $CHANGED_FILES; do
-          dir=$(echo "$file" | cut -d'/' -f1)
-          if [[ -d "$dir" && -f "$dir/terragrunt.hcl" ]]; then
-            if [[ ! " $CHANGED_DIRS " =~ " $dir " ]]; then
-              CHANGED_DIRS="$CHANGED_DIRS $dir"
+      run: |
+        BASE_SHA="${{ github.event.pull_request.base.sha }}"
+        HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+        
+        CHANGED_DIRS=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" | \
+          xargs -I {} dirname {} | \
+          sort -u | \
+          while read dir; do
+            if [[ -f "$dir/terragrunt.hcl" ]]; then
+              echo "$dir"
             fi
-          fi
-        done
-        echo "变更的项目目录: $CHANGED_DIRS"
-        echo "changed_dirs=$CHANGED_DIRS" >> $GITHUB_OUTPUT
+          done | sort -u)
+        
+        echo "变更的Terragrunt目录:"
+        echo "$CHANGED_DIRS"
+        
+        echo "changed_dirs<<EOF" >> $GITHUB_OUTPUT
+        echo "$CHANGED_DIRS" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
         
     
