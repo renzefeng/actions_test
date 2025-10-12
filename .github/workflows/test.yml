@@ -18,7 +18,7 @@ jobs:
 
     steps:
     - name: Check PR code
-      uses: actions/checkout
+      uses: actions/checkout@v4.1.1
       with:
         ref:  ${{ github.base_ref }}
 
