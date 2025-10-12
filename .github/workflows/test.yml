@@ -41,11 +41,19 @@ jobs:
       with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-    - name: Install Terragrunt
+    - name: Setup Terragrunt
       run: |
         curl -fsSL https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64 -o terragrunt
         chmod +x terragrunt
         sudo mv terragrunt /usr/local/bin/
+
+    - name: Setup TFSec
+      uses: aquasecurity/trivy-action@master
+      with:
+        scan-type: 'fs'
+        scan-ref: '.'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
 
     - name: Check versions
       run:  |
@@ -75,5 +83,131 @@ jobs:
         echo "changed_dirs<<EOF" >> $GITHUB_OUTPUT
         echo "$CHANGED_DIRS" >> $GITHUB_OUTPUT
         echo "EOF" >> $GITHUB_OUTPUT
+
+    - name: Validate formatting for changed projects
+      run: |
+        if [ -z "${{ steps.changed-dirs.outputs.changed_dirs }}" ]; then
+          echo "没有 Terragrunt 项目变更，跳过格式检查"
+          exit 0
+        fi
         
-    
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Validate formatting for changed projects"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt hclfmt --terragrunt-check"
+            cd $project
+            terragrunt hclfmt --terragrunt-check
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
+
+    - name: Initialize Terragrunt
+      run: |
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Initialize Terragrunt"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt run-all init"
+            cd $project
+            terragrunt run-all init
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
+
+    - name: Validate input variables
+      run: |
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Validate input variables"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt validate-inputs"
+            cd $project
+            terragrunt validate-inputs
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
+
+    - name: Validate configuration
+      run: |
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Validate configuration"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt run-all validate"
+            cd $project
+            terragrunt run-all validate
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
+
+    - name: Run tfsec security scan
+      id: tfsec
+      run: |
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Run tfsec security scan"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt run-all bash -c 'tfsec . --force-all-dirs --format json > tfsec-report.json 2>/dev/null || true'"
+            cd $project
+            terragrunt run-all bash -c "tfsec . --force-all-dirs --format json > tfsec-report.json 2>/dev/null || true"
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
+
+    - name: Run OPA compliance checks
+      id: opa
+      run: |
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Run OPA compliance checks"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt run-all bash -c terragrunt run-all bash -c 'conftest test terragrunt.hcl --policy ../policies/ --output json > opa-report.json || true'"
+            cd $project
+            terragrunt run-all bash -c "conftest test terragrunt.hcl --policy ../policies/ --output json > opa-report.json || true"
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
+
+    - name: Analyze security results and fail on critical issues
+      run: |
+        echo "====安全扫描结果分析===="
+        
+        CRITICAL_ISSUES=$(find . -name "tfsec-report.json" -exec jq -r '.results[] | select(.severity == "CRITICAL" or .severity == "HIGH") | "模块: \(.location.filename) | 风险: \(.severity) | 规则: \(.rule_description)"' {} + | head -10)
+        if [ -n "$CRITICAL_ISSUES" ]; then
+          echo "发现高风险安全问题:"
+          echo "$CRITICAL_ISSUES"
+          echo ""
+          echo "受影响的模块路径:"
+          find . -name "tfsec-report.json" -exec jq -r '.results[] | select(.severity == "CRITICAL" or .severity == "HIGH") | .location.filename' {} + | sort -u | sed 's|/terragrunt.hcl||' | sort -u
+          exit 1
+        else
+          echo "✅ 未发现 High/Critical 级别安全风险"
+        fi
+        
+        OPA_VIOLATIONS=$(find . -name "opa-report.json" -exec jq -r '.failures[]? | "模块: \(.location.file) | 问题: \(.msg)"' {} +)
+        if [ -n "$OPA_VIOLATIONS" ]; then
+          echo "OPA 合规性检查失败:"
+          echo "$OPA_VIOLATIONS"
+          exit 1
+        fi
+
+    - name: Generate execution plan
+      run: |
+        for project in ${{ steps.changed-dirs.outputs.changed_dirs }}; do
+          echo "Generate execution plan"
+          if [ -d "$project" ] && [ -f "$project/terragrunt.hcl" ]; then
+            echo "执行: cd $project && terragrunt run-all plan -out=tfplan"
+            cd $project
+            terragrunt run-all plan -out=tfplan
+            cd ..
+          else
+            echo "目录无效: $project"
+          fi
+        done
