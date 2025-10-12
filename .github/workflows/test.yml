@@ -1,0 +1,36 @@
+name: Terragrunt CI Pipeline
+
+on:
+  push:
+    branches: [ dev,main ]
+  pull_request:
+    branches: [ dev,main ]
+
+env:
+  TERRAFORM_VERSION: '1.8.4'
+  TERRAGRUNT_VERSION: '0.58.4'
+
+jobs:
+  validation:
+    name: Validate Terragrunt Configuration
+    run-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev'
+
+    steps:
+    - name: Check PR code
+      uses: actions/checkout
+      with:
+        ref:  ${{ github.base_ref }}
+
+    - name: Setup Terraform & Terragrunt
+      uses: hashicorp/setup-terraform@v3
+      with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+          terragrunt_version: ${{ env.TERRAGRUNT_VERSION }}
+
+    - name: Check versions
+      run:  |
+        echo "Terraform version:"
+        terraform version
+        echo "Terragrunt version:"
+        terragrunt --version
