@@ -14,9 +14,22 @@ jobs:
   validation:
     name: Validate Terragrunt Configuration
     runs-on: ubuntu-latest
-    if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev'
+    # if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev'
 
     steps:
+    - name: Debug GitHub Context
+      run: |
+        echo "Event: ${{ github.event_name }}"
+        echo "Ref: ${{ github.ref }}"
+        echo "Base Ref: ${{ github.base_ref }}"
+        echo "Head Ref: ${{ github.head_ref }}"
+        echo "Ref Name: ${{ github.ref_name }}"
+        echo "Ref Type: ${{ github.ref_type }}"
+        echo "SHA: ${{ github.sha }}"
+        echo "Workflow: ${{ github.workflow }}"
+        echo "Action: ${{ github.action }}"
+        echo "Actor: ${{ github.actor }}"
+
     - name: Check PR code
       uses: actions/checkout@v4.1.1
       with:
