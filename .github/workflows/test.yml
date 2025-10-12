@@ -13,7 +13,7 @@ env:
 jobs:
   validation:
     name: Validate Terragrunt Configuration
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
     if: github.event_name == 'pull_request' && github.base_ref == 'refs/heads/dev'
 
     steps:
