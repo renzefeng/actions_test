@@ -1,6 +1,8 @@
 name: Terragrunt CI Pipeline
 
 on:
+  push:
+    branches: [ dev ]
   pull_request:
     branches: [ dev,main ]
 
@@ -38,10 +40,11 @@ jobs:
       with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
 
-    - name: Setup Terragrunt
-      uses: autero1/action-terragrunt@v1
-      with:
-        terragrunt_version: ${{ env.TERRAGRUNT_VERSION }}
+    - name: Install Terragrunt
+      run: |
+        curl -fsSL https://github.com/gruntwork-io/terragrunt/releases/download/v${{ env.TERRAGRUNT_VERSION }}/terragrunt_linux_amd64 -o terragrunt
+        chmod +x terragrunt
+        sudo mv terragrunt /usr/local/bin/
 
     - name: Check versions
       run:  |
