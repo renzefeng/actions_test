@@ -1,8 +1,6 @@
 name: Terragrunt CI Pipeline
 
 on:
-  push:
-    branches: [ dev,main ]
   pull_request:
     branches: [ dev,main ]
 
@@ -35,11 +33,15 @@ jobs:
       with:
         ref:  ${{ github.base_ref }}
 
-    - name: Setup Terraform & Terragrunt
+    - name: Setup Terraform
       uses: hashicorp/setup-terraform@v3
       with:
           terraform_version: ${{ env.TERRAFORM_VERSION }}
-          terragrunt_version: ${{ env.TERRAGRUNT_VERSION }}
+
+    - name: Setup Terragrunt
+      uses: autero1/action-terragrunt@v1
+      with:
+        terragrunt_version: ${{ env.TERRAGRUNT_VERSION }}
 
     - name: Check versions
       run:  |
