@@ -8,7 +8,7 @@ jobs:
   delete-branch:
     runs-on: ubuntu-latest
     # 只在 PR 被合并且目标分支是 main 时运行
-    if: github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main'
+    # if: github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main'
 
     steps:
       - name: Delete merged branch
