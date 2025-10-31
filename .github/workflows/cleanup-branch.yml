@@ -12,7 +12,7 @@ jobs:
 
     steps:
       - name: Delete merged branch
-        uses: actions/delete-merged-branch@v1
+        uses: SvanBoxel/delete-merged-branch@main
         with:
           # 使用 GitHub Token
           repo_token: ${{ secrets.GITHUB_TOKEN }}
