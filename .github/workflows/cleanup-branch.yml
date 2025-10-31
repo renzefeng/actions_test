@@ -12,7 +12,7 @@ jobs:
     steps:
       - name: Delete branch
         # 使用社区制作的Action，它处理了权限和API调用细节
-        uses: SvanBoxel/delete-merged-branch@main
+        uses: SvanBoxel/delete-merged-branch@v1.0.1
         with:
           # 这里需要提供一个有删除分支权限的Token
           # 通常使用GITHUB_TOKEN，但在企业版中可能需要确认其权限
