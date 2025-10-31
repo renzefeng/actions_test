@@ -87,7 +87,7 @@ def main():
     rank_data_json = os.environ.get('RANK_DATA', '[]')
     rank_data = json.loads(rank_data_json)
     if not rank_data:
-        print("无法获取当前排行榜信息")
+        print("无法获取当前排行榜信息11")
         return False
     # 生成HTML内容
     template_path = 'templates/rank_email.html'
