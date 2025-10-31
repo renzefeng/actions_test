@@ -1,4 +1,4 @@
-name: Clean Up Branch on PR Merge
+name: Delete Branch on PR Merge
 
 on:
   pull_request:
@@ -6,16 +6,17 @@ on:
 
 jobs:
   delete-branch:
-    # 只有被合并的PR才删除分支，直接关闭的不删除（按需选择）
-    # if: github.event.pull_request.merged == true
     runs-on: ubuntu-latest
+    # 只在 PR 被合并且目标分支是 main 时运行
+    if: github.event.pull_request.merged == true && github.base_ref == 'refs/heads/main'
+
     steps:
-      - name: Delete branch
-        # 使用社区制作的Action，它处理了权限和API调用细节
-        uses: SvanBoxel/delete-merged-branch@main
+      - name: Delete merged branch
+        uses: actions/delete-merged-branch@v1
         with:
-          # 这里需要提供一个有删除分支权限的Token
-          # 通常使用GITHUB_TOKEN，但在企业版中可能需要确认其权限
-          token: ${{ secrets.GITHUB_TOKEN }}
-          # 可选：指定哪些分支受保护，不自动删除（例如main, develop等）
-          exclude_branches: "main, dev, production"
+          # 使用 GitHub Token
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          # 删除已合并的分支
+          delete_closed_pr: true
+          # 可选：排除的分支模式（保护重要分支）
+          exclude_branches: main,develop,production
