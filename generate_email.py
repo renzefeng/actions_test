@@ -27,7 +27,7 @@ def get_rank_list():
         data = {
             "type": "108",
             "level": "130-139",
-            "zone": "1462"
+            "zone": "1456"
         }
         response = requests.post(RANK_URL,data=data, headers=headers)
         return response.json().get("list")
