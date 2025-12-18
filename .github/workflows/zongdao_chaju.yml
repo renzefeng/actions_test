@@ -2,24 +2,35 @@ name: ZONGDAO ChaJu
 
 on:
   schedule:
-    # 每30分钟运行一次
-    - cron: '0 0 * * *'
-  workflow_dispatch: # 允许手动触发
-
+    # UTC 时间 16:30 = 北京时间 00:30（第二天）
+    # 每天北京时间 00:30 运行
+    - cron: '30 16 * * *'
+  workflow_dispatch:
 
 jobs:
   analyze-leaderboard:
     runs-on: ubuntu-latest
 
+    # 在这里设置全局环境变量
+    env:
+      TZ: Asia/Shanghai  # 设置时区为北京时间
+
     steps:
     - name: Check code
       uses: actions/checkout@v4
 
-    - name: Display UTC time
-      run: date
-
-    - name: Display Beijing time
-      run: date -d '+8 hours'  # UTC+8
+    - name: Set timezone to Beijing
+      run: |
+        # 设置系统时区
+        sudo ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+        echo "Asia/Shanghai" | sudo tee /etc/timezone
+        
+        # 验证时区设置
+        echo "系统时区已设置为："
+        timedatectl
+        echo ""
+        echo "当前时间（北京时间）："
+        date
 
     - name: Setup Python
       uses: actions/setup-python@v5
@@ -29,11 +40,7 @@ jobs:
     - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install requests
-        pip install jinja2
-        # 如果还有其他依赖，一并安装
-        # pip install pandas numpy
-        
+        pip install requests jinja2 pytz
         echo "✅ Python依赖安装完成"
 
     - name: Restore historical data from cache
@@ -41,43 +48,49 @@ jobs:
       uses: actions/cache/restore@v4
       with:
         path: ./leaderboard_cache
-        # 关键：使用前缀匹配最近7天的缓存
-        key: leaderboard-cache-${{ env.TODAY }}
+        # 关键：使用北京时间的日期
+        key: leaderboard-cache-${{ env.BEIJING_DATE }}
         restore-keys: |
           leaderboard-cache-
-        # 缓存失败时不使工作流失败
         fail-on-cache-miss: false
 
     - name: Get today's leaderborad data
       id: get-rank-data
       run: |
+        # 设置时区环境变量
+        export TZ=Asia/Shanghai
         # 运行Python脚本
         python wendao_test.py
       env:
+        TZ: Asia/Shanghai  # 确保Python脚本使用正确时区
         GITHUB_OUTPUT: ${{ github.workspace }}/output.txt
 
     - name: Process and analyze cultivation data
       id: process-data
       run: |
         echo "开始处理修仙排行榜数据..."
+        echo "当前时间（北京时间）：$(date '+%Y-%m-%d %H:%M:%S')"
         
-        # 从上一步获取rank_data
-        RANK_DATA='${{ steps.get-rank-data.outputs.rank_data }}'
+        # 使用北京时间生成TODAY变量
+        BEIJING_DATE=$(TZ=Asia/Shanghai date +%Y-%m-%d)
+        BEIJING_DATETIME=$(TZ=Asia/Shanghai date +'%Y-%m-%d %H:%M:%S')
+        
+        echo "BEIJING_DATE=$BEIJING_DATE" >> $GITHUB_ENV
+        echo "BEIJING_DATETIME=$BEIJING_DATETIME" >> $GITHUB_ENV
+        echo "TODAY=$BEIJING_DATE" >> $GITHUB_ENV  # 覆盖原来的TODAY
         
         # 运行处理脚本
         python scripts/process_leaderboard.py "$RANK_DATA"
-        
-        # 设置今日日期环境变量
-        echo "TODAY=$(date +%Y-%m-%d)" >> $GITHUB_ENV
       env:
         RANK_DATA_JSON: '${{ steps.get-rank-data.outputs.rank_data }}'
+        TZ: Asia/Shanghai  # 确保这个步骤使用北京时间
         GITHUB_OUTPUT: ${{ runner.temp }}/process_output.txt
 
-    # 步骤6：解码邮件HTML内容
     - name: Generate email content
       id: generate-email
       run: |
         echo "生成邮件内容..."
+        echo "报告日期（北京时间）：${{ env.BEIJING_DATE }}"
         
         # 解码base64编码的HTML内容
         if [ -n "${{ steps.process-data.outputs.email_html }}" ]; then
@@ -91,24 +104,24 @@ jobs:
           # 设置输出
           echo "has_update=true" >> $GITHUB_OUTPUT
         
-          # 将HTML内容作为输出（需要处理换行符）
-          EMAIL_CONTENT=$(cat email_content.html | tr -d '\n' | sed 's/"/\\"/g')
+          # 将HTML内容作为输出
+          EMAIL_CONTENT=$(cat email_content.html | sed 's/"/\\"/g')
           echo "email_html=\"$EMAIL_CONTENT\"" >> $GITHUB_OUTPUT
         else
           echo "has_update=false" >> $GITHUB_OUTPUT
           echo "email_html=\"<p>无新数据更新</p>\"" >> $GITHUB_OUTPUT
         fi
       env:
+        TZ: Asia/Shanghai
         GITHUB_OUTPUT: ${{ runner.temp }}/email_output.txt
 
-    # 步骤7：保存缓存
     - name: Save updated cache
       uses: actions/cache/save@v3
       with:
         path: ./leaderboard_cache
-        key: leaderboard-cache-${{ env.TODAY }}
+        # 使用北京时间作为缓存键
+        key: leaderboard-cache-${{ env.BEIJING_DATE }}
 
-    # 步骤8：发送邮件通知
     - name: Send email notification
       if: steps.generate-email.outputs.has_update == 'true'
       uses: dawidd6/action-send-mail@v3
@@ -117,19 +130,19 @@ jobs:
         server_port: 465
         username: ${{ secrets.MAIL_USERNAME }}
         password: ${{ secrets.MAIL_PASSWORD }}
-        subject: "🏆 道行排行榜7天趋势分析报告 - ${{ env.TODAY }}"
+        # 使用北京时间显示
+        subject: "🏆 道行排行榜7天趋势分析报告 - ${{ env.BEIJING_DATE }} (${{ env.BEIJING_DATETIME }})"
         html_body: "${{ steps.generate-email.outputs.email_html }}"
         to: 5515674@qq.com
         from: GitHub Actions
         secure: true
         content_type: text/html
 
-    # 步骤9：上传分析结果作为Artifact（可选）
     - name: Upload analysis artifacts
       if: always()
       uses: actions/upload-artifact@v4
       with:
-        name: leaderboard-analysis-${{ env.TODAY }}
+        name: leaderboard-analysis-${{ env.BEIJING_DATE }}
         path: |
           ./leaderboard_cache/trend_*.json
           ./leaderboard_cache/analysis_*.json
