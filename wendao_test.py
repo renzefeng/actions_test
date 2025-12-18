@@ -132,6 +132,7 @@ def main():
 if __name__ == '__main__':
     rank_data = main()
     rank_data_json = json.dumps(rank_data, ensure_ascii=False)
+    print(rank_data_json)
     with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as fh:
         print(f'rank_data={str(rank_data_json).lower()}', file=fh)
         print(f'rank_update=true', file=fh)
