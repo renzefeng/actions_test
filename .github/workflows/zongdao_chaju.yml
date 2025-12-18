@@ -111,7 +111,6 @@ jobs:
           echo "email_html=\"<p>无新数据更新</p>\"" >> $GITHUB_OUTPUT
         fi
       env:
-        TZ: Asia/Shanghai
         GITHUB_OUTPUT: ${{ runner.temp }}/email_output.txt
 
     - name: Save updated cache
