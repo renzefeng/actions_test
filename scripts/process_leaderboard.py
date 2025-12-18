@@ -27,7 +27,6 @@ class LeaderboardProcessor:
         """获取北京时间（UTC+8）"""
         utc_now = datetime.utcnow()
         beijing_time = utc_now + timedelta(hours=8)
-        beijing_time = datetime.now()
         return beijing_time
 
     def parse_time_string(self, time_str: str) -> int:
