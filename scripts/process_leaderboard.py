@@ -297,10 +297,10 @@ class LeaderboardProcessor:
         print("📊 问道排行榜7天趋势分析报告")
         print("=" * 60)
 
-        # 我的修炼趋势
+        # 我的飞仙趋势
         my_trend = trend_result.get('my_trend', [])
         if my_trend:
-            print(f"\n🧘 我的修炼进度 ({len(my_trend)}天记录):")
+            print(f"\n🧘 我的飞仙进度 ({len(my_trend)}天记录):")
             for record in my_trend:
                 days = record['total_days']
                 years = days // 365
@@ -314,14 +314,14 @@ class LeaderboardProcessor:
                 rank_change = first['rank'] - last['rank']  # 正数表示排名上升
 
                 print(f"\n  📈 总体变化:")
-                print(f"     修炼时间: {total_change:+d} 天")
+                print(f"     飞仙时间: {total_change:+d} 天")
                 print(f"     排名变化: {rank_change:+d} 位")
 
                 # 显示每日平均进度
                 my_progress = trend_result.get('my_progress', [])
                 if my_progress:
                     avg_daily = sum(p['days_gained'] for p in my_progress) / len(my_progress)
-                    print(f"     日均修炼: {avg_daily:.1f} 天")
+                    print(f"     日均飞仙: {avg_daily:.1f} 天")
 
         # 与其他道友的差距变化
         gap_changes = trend_result.get('significant_gap_changes', [])
@@ -381,13 +381,13 @@ class LeaderboardProcessor:
     <body>
         <div class="container">
             <div class="header">
-                <h1>🏆 修仙排行榜分析报告</h1>
+                <h1>🏆 道行排行榜分析报告</h1>
                 <p>分析日期: {trend_result.get('analysis_date', self.today)}</p>
             </div>
     
-            <!-- 我的修炼概况 -->
+            <!-- 我的飞仙概况 -->
             <div class="section">
-                <h2>🧘 我的修炼概况</h2>
+                <h2>🧘 我的飞仙概况</h2>
                 <table>
                     <tr>
                         <td><strong>角色名</strong></td>
@@ -396,23 +396,23 @@ class LeaderboardProcessor:
                         <td>{my_data.get('zone')}</td>
                     </tr>
                     <tr>
-                        <td><strong>当前境界</strong></td>
+                        <td><strong>当前道行</strong></td>
                         <td>{years}年{days}天</td>
-                        <td><strong>灵根属性</strong></td>
+                        <td><strong>系别</strong></td>
                         <td>{my_data.get('col3')}</td>
                     </tr>
                     <tr>
                         <td><strong>今日排名</strong></td>
                         <td>第{my_data.get('rank')}名</td>
-                        <td><strong>总修炼天数</strong></td>
-                        <td>{my_total_days}天</td>
+                        <td><strong>待定</strong></td>
+                        <td></td>
                     </tr>
                 </table>
             </div>
     
             <!-- 7天趋势 -->
             <div class="section">
-                <h2>📈 7天修炼趋势</h2>
+                <h2>📈 7天飞仙趋势</h2>
                 <p>基于 {trend_result.get('days_analyzed', 0)} 天的历史数据</p>
         '''
 
@@ -428,7 +428,7 @@ class LeaderboardProcessor:
                 <table>
                     <tr>
                         <th>日期</th>
-                        <th>修炼天数</th>
+                        <th>飞仙天数</th>
                         <th>排名</th>
                         <th>变化</th>
                     </tr>
@@ -480,7 +480,7 @@ class LeaderboardProcessor:
                 <h2>⚔️ 显著差距变化（前{min(10, len(gap_changes))}名）</h2>
                 <table>
                     <tr>
-                        <th>修仙者</th>
+                        <th>道友</th>
                         <th>变化趋势</th>
                         <th>当前状态</th>
                         <th>差距变化</th>
@@ -513,7 +513,7 @@ class LeaderboardProcessor:
             <div class="footer">
                 <p>此报告由 GitHub Actions 自动生成</p>
                 <p class="timestamp">生成时间: {beijing_now.strftime("%Y-%m-%d %H:%M:%S")}</p>
-                <p class="timestamp">数据来源: 修仙排行榜API | 分析周期: 7天</p>
+                <p class="timestamp">数据来源: 道行排行榜API | 分析周期: 7天</p>
             </div>
         </div>
     </body>
@@ -556,7 +556,7 @@ def main():
             print(f"  {i}. {player.get('name')} - {player.get('col2')}")
         sys.exit(1)
 
-    # 解析我的修炼时间
+    # 解析我的飞仙时间
     my_time_str = my_data.get('col2', '0年0天')
     my_total_days = processor.parse_time_string(my_time_str)
     years = my_total_days // 365
@@ -608,7 +608,7 @@ def main():
             email_html_encoded = base64.b64encode(email_html.encode('utf-8')).decode('utf-8')
             print(f'email_html={email_html_encoded}', file=fh)
 
-    print(f"\n🎉 修仙排行榜分析完成！")
+    print(f"\n🎉 道行排行榜分析完成！")
     print(f"📧 邮件内容已生成，共 {len(email_html)} 字符")
 
     # # 设置输出变量（用于GitHub Actions）
