@@ -1,4 +1,5 @@
-name: zongdao_chaju.yml
+name: ZONGDAO ChaJu
+
 on:
   schedule:
     # 每30分钟运行一次
