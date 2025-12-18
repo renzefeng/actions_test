@@ -9,109 +9,109 @@ jobs:
     runs-on: ubuntu-latest
 
   steps:
-    - name: Check code
-      uses: actions/checkout@v4
+  - name: Check code
+    uses: actions/checkout@v4
 
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+  - name: Setup Python
+    uses: actions/setup-python@v5
+    with:
+      python-version: '3.10'
 
-    - name: Restore historical data from cache
-      id: cache-restore
-      uses: actions/cache/restore@v4
-      with:
-        path: ./leaderboard_cache
-        # 关键：使用前缀匹配最近7天的缓存
-        restore-keys: |
-          leaderboard-cache-
-        # 缓存失败时不使工作流失败
-        fail-on-cache-miss: false
+  - name: Restore historical data from cache
+    id: cache-restore
+    uses: actions/cache/restore@v4
+    with:
+      path: ./leaderboard_cache
+      # 关键：使用前缀匹配最近7天的缓存
+      restore-keys: |
+        leaderboard-cache-
+      # 缓存失败时不使工作流失败
+      fail-on-cache-miss: false
 
-    - name: Get today's leaderborad data
-      id: get-rank-data
-      run: |
-        # 运行Python脚本
-        python wendao_test.py
-      env:
-        GITHUB_OUTPUT: ${{ github.workspace }}/output.txt
+  - name: Get today's leaderborad data
+    id: get-rank-data
+    run: |
+      # 运行Python脚本
+      python wendao_test.py
+    env:
+      GITHUB_OUTPUT: ${{ github.workspace }}/output.txt
 
-    - name: Process and analyze cultivation data
-      id: process-data
-      run: |
-        echo "开始处理修仙排行榜数据..."
-        
-        # 从上一步获取rank_data
-        RANK_DATA='${{ steps.get-rank-data.outputs.rank_data }}'
-        
-        # 运行处理脚本
-        python scripts/process_leaderboard.py "$RANK_DATA"
-        
-        # 设置今日日期环境变量
-        echo "TODAY=$(date +%Y-%m-%d)" >> $GITHUB_ENV
-      env:
-        RANK_DATA_JSON: '${{ steps.get-rank-data.outputs.rank_data }}'
-        GITHUB_OUTPUT: ${{ runner.temp }}/process_output.txt
+  - name: Process and analyze cultivation data
+    id: process-data
+    run: |
+      echo "开始处理修仙排行榜数据..."
+      
+      # 从上一步获取rank_data
+      RANK_DATA='${{ steps.get-rank-data.outputs.rank_data }}'
+      
+      # 运行处理脚本
+      python scripts/process_leaderboard.py "$RANK_DATA"
+      
+      # 设置今日日期环境变量
+      echo "TODAY=$(date +%Y-%m-%d)" >> $GITHUB_ENV
+    env:
+      RANK_DATA_JSON: '${{ steps.get-rank-data.outputs.rank_data }}'
+      GITHUB_OUTPUT: ${{ runner.temp }}/process_output.txt
 
-    # 步骤6：解码邮件HTML内容
-    - name: Generate email content
-      id: generate-email
-      run: |
-        echo "生成邮件内容..."
-        
-        # 解码base64编码的HTML内容
-        if [ -n "${{ steps.process-data.outputs.email_html }}" ]; then
-          echo "${{ steps.process-data.outputs.email_html }}" | base64 --decode > email_content.html
-          echo "邮件HTML内容已保存到 email_content.html"
-        
-          # 计算字符数
-          CHAR_COUNT=$(wc -c < email_content.html)
-          echo "邮件内容长度: $CHAR_COUNT 字符"
-        
-          # 设置输出
-          echo "has_update=true" >> $GITHUB_OUTPUT
-        
-          # 将HTML内容作为输出（需要处理换行符）
-          EMAIL_CONTENT=$(cat email_content.html | tr -d '\n' | sed 's/"/\\"/g')
-          echo "email_html=\"$EMAIL_CONTENT\"" >> $GITHUB_OUTPUT
-        else
-          echo "has_update=false" >> $GITHUB_OUTPUT
-          echo "email_html=\"<p>无新数据更新</p>\"" >> $GITHUB_OUTPUT
-        fi
-      env:
-        GITHUB_OUTPUT: ${{ runner.temp }}/email_output.txt
+  # 步骤6：解码邮件HTML内容
+  - name: Generate email content
+    id: generate-email
+    run: |
+      echo "生成邮件内容..."
+      
+      # 解码base64编码的HTML内容
+      if [ -n "${{ steps.process-data.outputs.email_html }}" ]; then
+        echo "${{ steps.process-data.outputs.email_html }}" | base64 --decode > email_content.html
+        echo "邮件HTML内容已保存到 email_content.html"
+      
+        # 计算字符数
+        CHAR_COUNT=$(wc -c < email_content.html)
+        echo "邮件内容长度: $CHAR_COUNT 字符"
+      
+        # 设置输出
+        echo "has_update=true" >> $GITHUB_OUTPUT
+      
+        # 将HTML内容作为输出（需要处理换行符）
+        EMAIL_CONTENT=$(cat email_content.html | tr -d '\n' | sed 's/"/\\"/g')
+        echo "email_html=\"$EMAIL_CONTENT\"" >> $GITHUB_OUTPUT
+      else
+        echo "has_update=false" >> $GITHUB_OUTPUT
+        echo "email_html=\"<p>无新数据更新</p>\"" >> $GITHUB_OUTPUT
+      fi
+    env:
+      GITHUB_OUTPUT: ${{ runner.temp }}/email_output.txt
 
-    # 步骤7：保存缓存
-    - name: Save updated cache
-      uses: actions/cache/save@v3
-      with:
-        path: ./leaderboard_cache
-        key: leaderboard-cache-${{ env.TODAY }}
+  # 步骤7：保存缓存
+  - name: Save updated cache
+    uses: actions/cache/save@v3
+    with:
+      path: ./leaderboard_cache
+      key: leaderboard-cache-${{ env.TODAY }}
 
-    # 步骤8：发送邮件通知
-    - name: Send email notification
-      if: steps.generate-email.outputs.has_update == 'true'
-      uses: dawidd6/action-send-mail@v3
-      with:
-        server_address: smtp.qq.com
-        server_port: 465
-        username: ${{ secrets.MAIL_USERNAME }}
-        password: ${{ secrets.MAIL_PASSWORD }}
-        subject: "🏆 修仙排行榜7天趋势分析报告 - ${{ env.TODAY }}"
-        body: "${{ steps.generate-email.outputs.email_html }}"
-        to: 5515674@qq.com
-        from: GitHub Actions
-        secure: true
-        content_type: text/html
+  # 步骤8：发送邮件通知
+  - name: Send email notification
+    if: steps.generate-email.outputs.has_update == 'true'
+    uses: dawidd6/action-send-mail@v3
+    with:
+      server_address: smtp.qq.com
+      server_port: 465
+      username: ${{ secrets.MAIL_USERNAME }}
+      password: ${{ secrets.MAIL_PASSWORD }}
+      subject: "🏆 修仙排行榜7天趋势分析报告 - ${{ env.TODAY }}"
+      body: "${{ steps.generate-email.outputs.email_html }}"
+      to: 5515674@qq.com
+      from: GitHub Actions
+      secure: true
+      content_type: text/html
 
-    # 步骤9：上传分析结果作为Artifact（可选）
-    - name: Upload analysis artifacts
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: leaderboard-analysis-${{ env.TODAY }}
-        path: |
-          ./leaderboard_cache/trend_*.json
-          ./leaderboard_cache/analysis_*.json
-          email_content.html
-        retention-days: 7
+  # 步骤9：上传分析结果作为Artifact（可选）
+  - name: Upload analysis artifacts
+    if: always()
+    uses: actions/upload-artifact@v4
+    with:
+      name: leaderboard-analysis-${{ env.TODAY }}
+      path: |
+        ./leaderboard_cache/trend_*.json
+        ./leaderboard_cache/analysis_*.json
+        email_content.html
+      retention-days: 7
