@@ -4,7 +4,7 @@ on:
   schedule:
     # UTC 时间 16:30 = 北京时间 00:30（第二天）
     # 每天北京时间 00:30 运行
-    - cron: '30 16 * * *'
+    - cron: '0 0 * * *'
   workflow_dispatch:
 
 jobs:
