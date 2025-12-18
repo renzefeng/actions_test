@@ -76,6 +76,8 @@ jobs:
         echo "BEIJING_DATETIME=$BEIJING_DATETIME" >> $GITHUB_ENV
         echo "TODAY=$BEIJING_DATE" >> $GITHUB_ENV  # 覆盖原来的TODAY
         
+        RANK_DATA='${{ steps.get-rank-data.outputs.rank_data }}'
+        
         # 运行处理脚本
         python scripts/process_leaderboard.py "$RANK_DATA"
       env:
