@@ -337,183 +337,183 @@ class LeaderboardProcessor:
         print("=" * 60)
 
 
-def generate_email_html(self, trend_result: Dict[str, Any],
-                        today_data: Dict,
-                        my_data: Dict) -> str:
-    """生成HTML格式的邮件内容"""
-    # 我的基本信息
-    my_time_str = my_data.get('col2', '0年0天')
-    my_total_days = self.parse_time_string(my_time_str)
-    years = my_total_days // 365
-    days = my_total_days % 365
+    def generate_email_html(self, trend_result: Dict[str, Any],
+                            today_data: Dict,
+                            my_data: Dict) -> str:
+        """生成HTML格式的邮件内容"""
+        # 我的基本信息
+        my_time_str = my_data.get('col2', '0年0天')
+        my_total_days = self.parse_time_string(my_time_str)
+        years = my_total_days // 365
+        days = my_total_days % 365
 
-    # 创建HTML邮件内容
-    html_content = f'''
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }}
-        .container {{ max-width: 800px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
-        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }}
-        .section {{ margin: 20px 0; padding: 15px; border-left: 4px solid #667eea; background-color: #f9f9f9; }}
-        .badge {{ display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin: 0 5px; }}
-        .badge-ahead {{ background-color: #4CAF50; color: white; }}
-        .badge-behind {{ background-color: #f44336; color: white; }}
-        .badge-neutral {{ background-color: #2196F3; color: white; }}
-        table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
-        th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }}
-        th {{ background-color: #f2f2f2; }}
-        .positive {{ color: #4CAF50; font-weight: bold; }}
-        .negative {{ color: #f44336; font-weight: bold; }}
-        .player-row:hover {{ background-color: #f5f5f5; }}
-        .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
-        .timestamp {{ color: #999; font-size: 11px; }}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="header">
-            <h1>🏆 修仙排行榜分析报告</h1>
-            <p>分析日期: {trend_result.get('analysis_date', self.today)}</p>
-        </div>
-
-        <!-- 我的修炼概况 -->
-        <div class="section">
-            <h2>🧘 我的修炼概况</h2>
-            <table>
-                <tr>
-                    <td><strong>角色名</strong></td>
-                    <td>{my_data.get('name')}</td>
-                    <td><strong>区服</strong></td>
-                    <td>{my_data.get('zone')}</td>
-                </tr>
-                <tr>
-                    <td><strong>当前境界</strong></td>
-                    <td>{years}年{days}天</td>
-                    <td><strong>灵根属性</strong></td>
-                    <td>{my_data.get('col3')}</td>
-                </tr>
-                <tr>
-                    <td><strong>今日排名</strong></td>
-                    <td>第{my_data.get('rank')}名</td>
-                    <td><strong>总修炼天数</strong></td>
-                    <td>{my_total_days}天</td>
-                </tr>
-            </table>
-        </div>
-
-        <!-- 7天趋势 -->
-        <div class="section">
-            <h2>📈 7天修炼趋势</h2>
-            <p>基于 {trend_result.get('days_analyzed', 0)} 天的历史数据</p>
-    '''
-
-    # 添加我的趋势表格
-    my_trend = trend_result.get('my_trend', [])
-    if my_trend and len(my_trend) >= 2:
-        first = my_trend[0]
-        last = my_trend[-1]
-        total_change = last['total_days'] - first['total_days']
-        rank_change = first['rank'] - last['rank']
-
-        html_content += f'''
-            <table>
-                <tr>
-                    <th>日期</th>
-                    <th>修炼天数</th>
-                    <th>排名</th>
-                    <th>变化</th>
-                </tr>
+        # 创建HTML邮件内容
+        html_content = f'''
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <meta charset="UTF-8">
+        <style>
+            body {{ font-family: Arial, sans-serif; margin: 20px; background-color: #f5f5f5; }}
+            .container {{ max-width: 800px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }}
+            .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 10px 10px 0 0; text-align: center; }}
+            .section {{ margin: 20px 0; padding: 15px; border-left: 4px solid #667eea; background-color: #f9f9f9; }}
+            .badge {{ display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 12px; margin: 0 5px; }}
+            .badge-ahead {{ background-color: #4CAF50; color: white; }}
+            .badge-behind {{ background-color: #f44336; color: white; }}
+            .badge-neutral {{ background-color: #2196F3; color: white; }}
+            table {{ width: 100%; border-collapse: collapse; margin: 10px 0; }}
+            th, td {{ padding: 10px; text-align: left; border-bottom: 1px solid #ddd; }}
+            th {{ background-color: #f2f2f2; }}
+            .positive {{ color: #4CAF50; font-weight: bold; }}
+            .negative {{ color: #f44336; font-weight: bold; }}
+            .player-row:hover {{ background-color: #f5f5f5; }}
+            .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
+            .timestamp {{ color: #999; font-size: 11px; }}
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="header">
+                <h1>🏆 修仙排行榜分析报告</h1>
+                <p>分析日期: {trend_result.get('analysis_date', self.today)}</p>
+            </div>
+    
+            <!-- 我的修炼概况 -->
+            <div class="section">
+                <h2>🧘 我的修炼概况</h2>
+                <table>
+                    <tr>
+                        <td><strong>角色名</strong></td>
+                        <td>{my_data.get('name')}</td>
+                        <td><strong>区服</strong></td>
+                        <td>{my_data.get('zone')}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>当前境界</strong></td>
+                        <td>{years}年{days}天</td>
+                        <td><strong>灵根属性</strong></td>
+                        <td>{my_data.get('col3')}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>今日排名</strong></td>
+                        <td>第{my_data.get('rank')}名</td>
+                        <td><strong>总修炼天数</strong></td>
+                        <td>{my_total_days}天</td>
+                    </tr>
+                </table>
+            </div>
+    
+            <!-- 7天趋势 -->
+            <div class="section">
+                <h2>📈 7天修炼趋势</h2>
+                <p>基于 {trend_result.get('days_analyzed', 0)} 天的历史数据</p>
         '''
 
-        for i, record in enumerate(my_trend):
-            if i > 0:
-                prev = my_trend[i - 1]
-                days_change = record['total_days'] - prev['total_days']
-                rank_change_row = prev['rank'] - record['rank']
-                days_class = "positive" if days_change > 0 else "negative" if days_change < 0 else ""
-                rank_class = "positive" if rank_change_row > 0 else "negative" if rank_change_row < 0 else ""
-
-                html_content += f'''
-                <tr>
-                    <td>{record['date']}</td>
-                    <td>{record['total_days']}天</td>
-                    <td>第{record['rank']}名</td>
-                    <td>
-                        <span class="{days_class}">{days_change:+.0f}天</span> / 
-                        <span class="{rank_class}">{rank_change_row:+d}名</span>
-                    </td>
-                </tr>
-                '''
-
-        html_content += f'''
-            </table>
-            <p><strong>总体变化:</strong> 
-                <span class="{'positive' if total_change > 0 else 'negative' if total_change < 0 else ''}">
-                    {total_change:+.0f}天
-                </span>，
-                <span class="{'positive' if rank_change > 0 else 'negative' if rank_change < 0 else ''}">
-                    排名{rank_change:+d}位
-                </span>
-            </p>
-        '''
-    else:
-        html_content += "<p>暂无足够的历史数据进行分析</p>"
-
-    html_content += '''
-        </div>
-    '''
-
-    # 添加显著差距变化
-    gap_changes = trend_result.get('significant_gap_changes', [])
-    if gap_changes:
-        html_content += f'''
-        <div class="section">
-            <h2>⚔️ 显著差距变化（前{min(10, len(gap_changes))}名）</h2>
-            <table>
-                <tr>
-                    <th>修仙者</th>
-                    <th>变化趋势</th>
-                    <th>当前状态</th>
-                    <th>差距变化</th>
-                    <th>时间范围</th>
-                </tr>
-        '''
-
-        for i, change in enumerate(gap_changes[:10], 1):
-            status_class = "badge-ahead" if change['current_status'] == "领先" else "badge-behind"
-            change_class = "positive" if change['change_days'] < 0 else "negative"  # 负数表示对我有利
+        # 添加我的趋势表格
+        my_trend = trend_result.get('my_trend', [])
+        if my_trend and len(my_trend) >= 2:
+            first = my_trend[0]
+            last = my_trend[-1]
+            total_change = last['total_days'] - first['total_days']
+            rank_change = first['rank'] - last['rank']
 
             html_content += f'''
-                <tr class="player-row">
-                    <td><strong>#{i}</strong> {change['player']}</td>
-                    <td>{change['direction']}</td>
-                    <td><span class="badge {status_class}">{change['current_status']}</span></td>
-                    <td class="{change_class}">{change['change_days']:+.0f}天</td>
-                    <td>{change['first_date']} → {change['last_date']}</td>
-                </tr>
+                <table>
+                    <tr>
+                        <th>日期</th>
+                        <th>修炼天数</th>
+                        <th>排名</th>
+                        <th>变化</th>
+                    </tr>
             '''
 
+            for i, record in enumerate(my_trend):
+                if i > 0:
+                    prev = my_trend[i - 1]
+                    days_change = record['total_days'] - prev['total_days']
+                    rank_change_row = prev['rank'] - record['rank']
+                    days_class = "positive" if days_change > 0 else "negative" if days_change < 0 else ""
+                    rank_class = "positive" if rank_change_row > 0 else "negative" if rank_change_row < 0 else ""
+
+                    html_content += f'''
+                    <tr>
+                        <td>{record['date']}</td>
+                        <td>{record['total_days']}天</td>
+                        <td>第{record['rank']}名</td>
+                        <td>
+                            <span class="{days_class}">{days_change:+.0f}天</span> / 
+                            <span class="{rank_class}">{rank_change_row:+d}名</span>
+                        </td>
+                    </tr>
+                    '''
+
+            html_content += f'''
+                </table>
+                <p><strong>总体变化:</strong> 
+                    <span class="{'positive' if total_change > 0 else 'negative' if total_change < 0 else ''}">
+                        {total_change:+.0f}天
+                    </span>，
+                    <span class="{'positive' if rank_change > 0 else 'negative' if rank_change < 0 else ''}">
+                        排名{rank_change:+d}位
+                    </span>
+                </p>
+            '''
+        else:
+            html_content += "<p>暂无足够的历史数据进行分析</p>"
+
         html_content += '''
-            </table>
-        </div>
+            </div>
         '''
 
-    # 邮件结尾
-    html_content += f'''
-        <div class="footer">
-            <p>此报告由 GitHub Actions 自动生成</p>
-            <p class="timestamp">生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
-            <p class="timestamp">数据来源: 修仙排行榜API | 分析周期: 7天</p>
-        </div>
-    </div>
-</body>
-</html>
-    '''
+        # 添加显著差距变化
+        gap_changes = trend_result.get('significant_gap_changes', [])
+        if gap_changes:
+            html_content += f'''
+            <div class="section">
+                <h2>⚔️ 显著差距变化（前{min(10, len(gap_changes))}名）</h2>
+                <table>
+                    <tr>
+                        <th>修仙者</th>
+                        <th>变化趋势</th>
+                        <th>当前状态</th>
+                        <th>差距变化</th>
+                        <th>时间范围</th>
+                    </tr>
+            '''
 
-    return html_content
+            for i, change in enumerate(gap_changes[:10], 1):
+                status_class = "badge-ahead" if change['current_status'] == "领先" else "badge-behind"
+                change_class = "positive" if change['change_days'] < 0 else "negative"  # 负数表示对我有利
+
+                html_content += f'''
+                    <tr class="player-row">
+                        <td><strong>#{i}</strong> {change['player']}</td>
+                        <td>{change['direction']}</td>
+                        <td><span class="badge {status_class}">{change['current_status']}</span></td>
+                        <td class="{change_class}">{change['change_days']:+.0f}天</td>
+                        <td>{change['first_date']} → {change['last_date']}</td>
+                    </tr>
+                '''
+
+            html_content += '''
+                </table>
+            </div>
+            '''
+
+        # 邮件结尾
+        html_content += f'''
+            <div class="footer">
+                <p>此报告由 GitHub Actions 自动生成</p>
+                <p class="timestamp">生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+                <p class="timestamp">数据来源: 修仙排行榜API | 分析周期: 7天</p>
+            </div>
+        </div>
+    </body>
+    </html>
+        '''
+
+        return html_content
 
 def main():
     """主函数"""
