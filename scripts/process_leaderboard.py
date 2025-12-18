@@ -458,7 +458,7 @@ class LeaderboardProcessor:
                 </table>
                 <p><strong>总体变化:</strong> 
                     <span class="{'positive' if total_change > 0 else 'negative' if total_change < 0 else ''}">
-                        {float(total_change/365):+.0f}天
+                        {float(total_change/365):+.0f}年
                     </span>，
                     <span class="{'positive' if rank_change > 0 else 'negative' if rank_change < 0 else ''}">
                         排名{rank_change:+d}位
