@@ -418,7 +418,7 @@ class LeaderboardProcessor:
 
         # 添加我的趋势表格
         my_trend = trend_result.get('my_trend', [])
-        if my_trend and len(my_trend) >= 2:
+        if my_trend and len(my_trend) >= 1:
             first = my_trend[0]
             last = my_trend[-1]
             total_change = last['total_days'] - first['total_days']
