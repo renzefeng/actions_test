@@ -25,21 +25,60 @@ def get_rank_list():
             "User-Agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36"
         }
         data = {
-            "type":"108",
-            "level":"120-129",
-            "zone":"1462"
+            "type":"102",
+            "level":"130-139",
+            "zone":"1456"
         }
         response = requests.post(RANK_URL,data=data, headers=headers)
-        return response.json().get("list")
+        return response.json()
     except Exception as e:
         print(f"获取排行榜信息时出错: {e}")
     return None
+
+
+def convert_time_to_days(time_str):
+    """
+    将时间字符串（如"1年11天"）转换为天数
+
+    Args:
+        time_str (str): 时间字符串，格式如"1年11天"
+
+    Returns:
+        str: 转换后的天数，格式如"376天"
+    """
+    # 初始化年数和天数
+    years = 0
+    days = 0
+
+    # 分割字符串
+    if '年' in time_str:
+        parts = time_str.split('年')
+        years = int(parts[0])
+        # 处理剩余部分
+        if parts[1] and '天' in parts[1]:
+            days_str = parts[1].replace('天', '').strip()
+            if days_str:
+                days = int(days_str)
+    elif '天' in time_str:
+        days_str = time_str.replace('天', '').strip()
+        if days_str:
+            days = int(days_str)
+
+    # 计算总天数（1年=365天）
+    total_days = years * 365 + days
+
+    return total_days
 
 
 def process_rank_data(rank_data):
     """处理排行榜数据"""
     processed_data = []
     new_books_count = len(rank_data)
+    my_col2 = 0
+    for item in rank_data:
+        if "思鱼" in item.get("name"):
+            my_col2 = convert_time_to_days(item.get("col2"))
+    print("思鱼的道行：",my_col2)
 
     for item in rank_data:
         # 确定变化类型
@@ -52,7 +91,7 @@ def process_rank_data(rank_data):
         processed_data.append({
             'name': item['name'],
             'zone': item['zone'],
-            'col2': item['col2'],
+            'col2': f"{convert_time_to_days(item['col2']) - my_col2 / 366}年",
             'col3': item['col3'],
         })
 
