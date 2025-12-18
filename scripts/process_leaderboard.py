@@ -314,14 +314,14 @@ class LeaderboardProcessor:
                 rank_change = first['rank'] - last['rank']  # 正数表示排名上升
 
                 print(f"\n  📈 总体变化:")
-                print(f"     道行增长: {total_change%365:+d} 年")
+                print(f"     道行增长: {(total_change%365):+d} 年")
                 print(f"     排名变化: {rank_change:+d} 位")
 
                 # 显示每日平均进度
                 my_progress = trend_result.get('my_progress', [])
                 if my_progress:
                     avg_daily = sum(p['days_gained'] for p in my_progress) / len(my_progress)
-                    print(f"     日均飞仙: {avg_daily%365:+d} 年")
+                    print(f"     日均飞仙: {(avg_daily % 365):+d} 年")
 
         # 与其他道友的差距变化
         gap_changes = trend_result.get('significant_gap_changes', [])
@@ -334,8 +334,8 @@ class LeaderboardProcessor:
                 print(f"\n  {i}. {change['player']} {status_symbol}")
                 print(f"     {change['direction']} {abs(change['change_days']%365)}年")
                 print(f"     目前{change['current_status']} {gap_desc}")
-                print(f"     📅 {change['first_date']}: {change['first_gap']%365:+d}年")
-                print(f"     📅 {change['last_date']}: {change['last_gap']%365:+d}年")
+                print(f"     📅 {change['first_date']}: {(change['first_gap']%365):+d}年")
+                print(f"     📅 {change['last_date']}: {(change['last_gap']%365):+d}年")
         else:
             print(f"\n⚔️  无显著差距变化（变化均小于100天）")
 
