@@ -418,10 +418,7 @@ class LeaderboardProcessor:
 
         # 添加我的趋势表格
         my_trend = trend_result.get('my_trend', [])
-        my_trend.append({'date': '2025-12-18', 'total_days': 7493920, 'rank': 13, 'time_string': '20531年105天', 'zone': '白鹤临渊'})
-        my_trend.append({'date': '2025-12-17', 'total_days': 7493320, 'rank': 13, 'time_string': '20531年105天', 'zone': '白鹤临渊'})
-        my_trend.append({'date': '2025-12-16', 'total_days': 7491920, 'rank': 13, 'time_string': '20531年105天', 'zone': '白鹤临渊'})
-        if my_trend and len(my_trend) >= 1:
+        if my_trend and len(my_trend) >= 2:
             first = my_trend[0]
             last = my_trend[-1]
             total_change = last['total_days'] - first['total_days']
