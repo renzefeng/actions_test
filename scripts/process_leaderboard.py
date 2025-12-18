@@ -418,6 +418,7 @@ class LeaderboardProcessor:
 
         # 添加我的趋势表格
         my_trend = trend_result.get('my_trend', [])
+        print(my_trend,"my_trend")
         if my_trend and len(my_trend) >= 1:
             first = my_trend[0]
             last = my_trend[-1]
