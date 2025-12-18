@@ -30,7 +30,7 @@ def get_rank_list():
             "zone":"1456"
         }
         response = requests.post(RANK_URL,data=data, headers=headers)
-        return response.json().get("list")
+        return response.json()
     except Exception as e:
         print(f"获取排行榜信息时出错: {e}")
     return None
