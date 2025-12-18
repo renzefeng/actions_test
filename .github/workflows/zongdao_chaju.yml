@@ -24,7 +24,7 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install requests
-        
+        pip install jinja2
         # 如果还有其他依赖，一并安装
         # pip install pandas numpy
         
