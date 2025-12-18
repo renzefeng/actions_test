@@ -502,7 +502,7 @@ class LeaderboardProcessor:
             '''
 
         # 邮件结尾
-        html_content += f'''
+        html_content += f"""
             <div class="footer">
                 <p>此报告由 GitHub Actions 自动生成</p>
                 <p class="timestamp">生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
@@ -511,7 +511,7 @@ class LeaderboardProcessor:
         </div>
     </body>
     </html>
-        '''
+        """
 
         return html_content
 
