@@ -89,7 +89,6 @@ jobs:
       id: generate-email
       run: |
         echo "生成邮件内容..."
-        echo "报告日期（北京时间）：${{ env.BEIJING_DATE }}"
         
         # 解码base64编码的HTML内容
         if [ -n "${{ steps.process-data.outputs.email_html }}" ]; then
@@ -103,8 +102,8 @@ jobs:
           # 设置输出
           echo "has_update=true" >> $GITHUB_OUTPUT
         
-          # 将HTML内容作为输出
-          EMAIL_CONTENT=$(cat email_content.html | sed 's/"/\\"/g')
+          # 将HTML内容作为输出（需要处理换行符）
+          EMAIL_CONTENT=$(cat email_content.html | tr -d '\n' | sed 's/"/\\"/g')
           echo "email_html=\"$EMAIL_CONTENT\"" >> $GITHUB_OUTPUT
         else
           echo "has_update=false" >> $GITHUB_OUTPUT
