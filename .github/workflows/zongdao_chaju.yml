@@ -15,6 +15,12 @@ jobs:
     - name: Check code
       uses: actions/checkout@v4
 
+    - name: Display UTC time
+      run: date
+
+    - name: Display Beijing time
+      run: date -d '+8 hours'  # UTC+8
+
     - name: Setup Python
       uses: actions/setup-python@v5
       with:
