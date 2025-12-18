@@ -26,6 +26,7 @@ jobs:
       with:
         path: ./leaderboard_cache
         # 关键：使用前缀匹配最近7天的缓存
+        key: leaderboard-cache-${{ env.TODAY }}
         restore-keys: |
           leaderboard-cache-
         # 缓存失败时不使工作流失败
