@@ -428,7 +428,7 @@ class LeaderboardProcessor:
                 <table>
                     <tr>
                         <th>日期</th>
-                        <th>飞仙天数</th>
+                        <th>道行</th>
                         <th>排名</th>
                         <th>变化</th>
                     </tr>
@@ -445,10 +445,10 @@ class LeaderboardProcessor:
                     html_content += f'''
                     <tr>
                         <td>{record['date']}</td>
-                        <td>{record['total_days']}天</td>
+                        <td>{int(record['total_days']/365)}年</td>
                         <td>第{record['rank']}名</td>
                         <td>
-                            <span class="{days_class}">{days_change:+.0f}天</span> / 
+                            <span class="{days_class}">{int(days_change/365):+d}天</span> / 
                             <span class="{rank_class}">{rank_change_row:+d}名</span>
                         </td>
                     </tr>
@@ -497,7 +497,7 @@ class LeaderboardProcessor:
                         <td><strong>#{i}</strong> {change['player']}</td>
                         <td>{change['direction']}</td>
                         <td><span class="badge {status_class}">{change['current_status']}</span></td>
-                        <td class="{change_class}">{change['change_days']:+.0f}天</td>
+                        <td class="{change_class}">{int(change['change_days']/365):+d}年</td>
                         <td>{change['first_date']} → {change['last_date']}</td>
                     </tr>
                 '''
