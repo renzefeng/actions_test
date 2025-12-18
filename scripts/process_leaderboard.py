@@ -21,7 +21,13 @@ class LeaderboardProcessor:
         self.my_character_name = "゛青霖"  # 例如："中州帝仙つ"
 
         # 获取今日日期
-        self.today = datetime.now().strftime("%Y-%m-%d")
+        self.today = self.get_beijing_time().strftime("%Y-%m-%d")
+
+    def get_beijing_time(self):
+        """获取北京时间（UTC+8）"""
+        utc_now = datetime.now(datetime.UTC)
+        beijing_time = utc_now + timedelta(hours=8)
+        return beijing_time
 
     def parse_time_string(self, time_str: str) -> int:
         """
@@ -502,10 +508,11 @@ class LeaderboardProcessor:
             '''
 
         # 邮件结尾
+        beijing_now = self.get_beijing_time()
         html_content += f"""
             <div class="footer">
                 <p>此报告由 GitHub Actions 自动生成</p>
-                <p class="timestamp">生成时间: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
+                <p class="timestamp">生成时间: {beijing_now.strftime("%Y-%m-%d %H:%M:%S")}</p>
                 <p class="timestamp">数据来源: 修仙排行榜API | 分析周期: 7天</p>
             </div>
         </div>
