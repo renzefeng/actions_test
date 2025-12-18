@@ -112,7 +112,7 @@ jobs:
         username: ${{ secrets.MAIL_USERNAME }}
         password: ${{ secrets.MAIL_PASSWORD }}
         subject: "🏆 修仙排行榜7天趋势分析报告 - ${{ env.TODAY }}"
-        body: "${{ steps.generate-email.outputs.email_html }}"
+        html_body: "${{ steps.generate-email.outputs.email_html }}"
         to: 5515674@qq.com
         from: GitHub Actions
         secure: true
